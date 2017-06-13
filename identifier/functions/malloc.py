@@ -1,7 +1,7 @@
 from ..func import Func, TestData
 import random
 import string
-from simuvex import SimMemoryError
+from angr import SimMemoryError
 
 class malloc(Func):
     def __init__(self):

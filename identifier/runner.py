@@ -1,9 +1,6 @@
-import string
-
 import angr
-import simuvex
-import simuvex.s_options as so
-from simuvex.s_type import SimTypeFunction, SimTypeInt
+import angr.sim_options as so
+from angr.sim_type import SimTypeFunction, SimTypeInt
 from .custom_callable import Callable
 from angr.errors import AngrCallableMultistateError, AngrCallableError
 import claripy
@@ -38,7 +35,7 @@ class Runner(object):
             options.add(so.UNICORN)
             l.info("unicorn tracing enabled")
 
-            remove_options = so.simplification | set(so.LAZY_SOLVES) | simuvex.o.resilience_options | set(so.SUPPORT_FLOATING_POINT)
+            remove_options = so.simplification | set(so.LAZY_SOLVES) | angr.options.resilience_options | set(so.SUPPORT_FLOATING_POINT)
             add_options = options
             entry_state = self.project.factory.entry_state(
                     add_options=add_options,
@@ -84,7 +81,7 @@ class Runner(object):
             out_state.scratch.clear()
             out_state.scratch.jumpkind = "Ijk_Boring"
             return out_state
-        except simuvex.SimError as e:
+        except angr.SimError as e:
             l.warning("SimError in get recv state %s", e.message)
             return self.project.factory.entry_state()
         except angr.AngrError as e:
@@ -94,10 +91,10 @@ class Runner(object):
     def setup_state(self, function, test_data, initial_state=None, concrete_rand=False):
         # FIXME fdwait should do something concrete...
         # FixedInReceive and FixedOutReceive always are applied
-        simuvex.SimProcedures['cgc']['transmit'] = FixedOutTransmit
-        simuvex.SimProcedures['cgc']['receive'] = FixedInReceive
+        angr.SIM_PROCEDURES['cgc']['transmit'] = FixedOutTransmit
+        angr.SIM_PROCEDURES['cgc']['receive'] = FixedInReceive
 
-        fs = {'/dev/stdin': simuvex.storage.file.SimFile(
+        fs = {'/dev/stdin': angr.storage.file.SimFile(
             "/dev/stdin", "r",
             size=len(test_data.preloaded_stdin))}
 
@@ -138,14 +135,14 @@ class Runner(object):
         # syscall hook
         entry_state.inspect.b(
             'syscall',
-            simuvex.BP_BEFORE,
+            angr.BP_BEFORE,
             action=self.syscall_hook
         )
 
         if concrete_rand:
             entry_state.inspect.b(
                 'syscall',
-                simuvex.BP_AFTER,
+                angr.BP_AFTER,
                 action=self.syscall_hook_concrete_rand
             )
 

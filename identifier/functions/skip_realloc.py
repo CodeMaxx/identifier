@@ -1,7 +1,7 @@
 from ..func import Func, TestData
 import random
 from ..errors import IdentifierException
-from simuvex import SimMemoryError
+from angr import SimMemoryError
 
 import logging
 l = logging.getLogger("identifier.functions.free")

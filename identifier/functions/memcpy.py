@@ -2,7 +2,7 @@ from ..func import Func, TestData
 import random
 import itertools
 import struct
-from simuvex.s_type import SimTypeFunction, SimTypeInt
+from angr.sim_type import SimTypeFunction, SimTypeInt
 
 
 from ..errors import FunctionNotInitialized

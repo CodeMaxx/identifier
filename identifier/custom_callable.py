@@ -1,4 +1,4 @@
-import simuvex
+import angr
 from angr.errors import AngrCallableError, AngrCallableMultistateError
 
 import logging
@@ -38,7 +38,7 @@ class Callable(object):
         self._base_state = base_state
         self._toc = toc
         self._caller = None
-        self._cc = cc if cc is not None else simuvex.DefaultCC[project.arch.name](project.arch)
+        self._cc = cc if cc is not None else angr.DEFAULT_CC[project.arch.name](project.arch)
         self._deadend_addr = project._simos.return_deadend
         self._max_steps = max_steps
 

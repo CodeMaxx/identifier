@@ -5,9 +5,8 @@ from collections import defaultdict
 from functions import Functions
 from errors import IdentifierException
 from runner import Runner
-import simuvex
 import angr
-from simuvex.s_errors import SimEngineError, SimMemoryError
+from angr.errors import SimEngineError, SimMemoryError
 import os
 
 from networkx import NetworkXError
@@ -72,7 +71,7 @@ class Identifier(object):
             return
 
         self.base_symbolic_state = rop_utils.make_symbolic_state(self.project, self._reg_list)
-        self.base_symbolic_state.options.discard(simuvex.o.SUPPORT_FLOATING_POINT)
+        self.base_symbolic_state.options.discard(angr.options.SUPPORT_FLOATING_POINT)
         self.base_symbolic_state.regs.bp = self.base_symbolic_state.se.BVS("sreg_" + "ebp" + "-", self.project.arch.bits)
 
         for f in self._cfg.functions.values():
@@ -151,9 +150,9 @@ class Identifier(object):
                     l.warning('Encountered IdentifierException trying to analyze %#x, reason: %s',
                             f.addr, e.message)
                     continue
-                except simuvex.SimSegfaultError:
+                except angr.SimSegfaultError:
                     continue
-                except simuvex.SimError as e:
+                except angr.SimError as e:
                     l.warning("SimError %s", e.message)
                     continue
                 except angr.AngrError as e:
@@ -261,9 +260,9 @@ class Identifier(object):
                 if test_data is not None and not self._runner.test(cfg_func, test_data):
                     return False
             return True
-        except simuvex.SimSegfaultError:
+        except angr.SimSegfaultError:
             return False
-        except simuvex.SimError as e:
+        except angr.SimError as e:
             l.warning("SimError %s", e.message)
             return False
         except angr.AngrError as e:
@@ -293,10 +292,10 @@ class Identifier(object):
     def do_trace(self, addr_trace, reverse_accesses, func_info):
         # get to the callsite
         s = rop_utils.make_symbolic_state(self.project, self._reg_list, stack_length=200)
-        s.options.discard(simuvex.o.AVOID_MULTIVALUED_WRITES)
-        s.options.discard(simuvex.o.AVOID_MULTIVALUED_READS)
-        s.options.add(simuvex.o.UNDER_CONSTRAINED_SYMEXEC)
-        s.options.discard(simuvex.o.LAZY_SOLVES)
+        s.options.discard(angr.options.AVOID_MULTIVALUED_WRITES)
+        s.options.discard(angr.options.AVOID_MULTIVALUED_READS)
+        s.options.add(angr.options.UNDER_CONSTRAINED_SYMEXEC)
+        s.options.discard(angr.options.LAZY_SOLVES)
 
         func_info = self.func_info[self.block_to_func[addr_trace[0]]]
         for i in range(func_info.frame_size/self.project.arch.bytes+5):
